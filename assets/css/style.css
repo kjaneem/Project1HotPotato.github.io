@@ -47,3 +47,7 @@ td img {
 .name-btn{        
         margin:0 4px 0 0 !important;
     }
+
+    #app-name {
+        margin-left: 20px;
+    }

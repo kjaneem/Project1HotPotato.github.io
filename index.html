@@ -23,7 +23,7 @@
     <nav>
         <div class="nav-wrapper">
             <img src="assets/images/hot-potato.gif" id="logo">
-            <a href="#" class="brand-logo">Priority Potato's</a>
+            <a id="app-name" href="#" class="brand-logo">Priority Potato's</a>
 
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a class="btn light-blue name-btn" href="sass.html">Karen</a></li>
@@ -81,12 +81,15 @@
     <br></br>
 
     <!-- Dropdown Trigger -->
-    <h4>PASS TO</h4>
-    <a class='dropdown-button btn light-blue' href='#' data-activates='dropdown1'>Drop Me!</a>
+    <!--add id="passTo"-->
+    <h4 id="passTo">PASS TO</h4>
+    <!--Add id="dropBtn"-->
+    <a class='dropdown-button btn light-blue' href='#' data-activates='dropdown1' id="dropBtn">Drop Me!</a>
 
     <!-- Dropdown Structure -->
     <ul id='dropdown1' class='dropdown-content'>
-        <li> <a class="btn assign waves-effect waves-light btn light-blue" data-role="manager">Manager</a></li>
+        <!--capitalize M in manager in data role-->
+        <li> <a class="btn assign waves-effect waves-light btn light-blue" data-role="Manager">Manager</a></li>
         <li class="divider"></li>
         <li> <a class="btn assign waves-effect waves-light btn light-blue" data-role="QA">QA</a></li>
         <li> <a class="btn assign waves-effect waves-light btn light-blue" data-role="BA">BA</a></li>
@@ -129,163 +132,11 @@
         </div>
     </footer>
 
+    <script src="assets/javascript/code.js"></script>
 
-    <script>
-        var manager;
-        var qa;
-        var ba;
-        var dev;
-        var count = 0;
-        var assignTo = "";
-        var task;
 
-        // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyCSCdkQH0zqSN5DksGq-fcesTHrzVYcjCM",
-            authDomain: "project-1-6255c.firebaseapp.com",
-            databaseURL: "https://project-1-6255c.firebaseio.com",
-            projectId: "project-1-6255c",
-            storageBucket: "project-1-6255c.appspot.com",
-            messagingSenderId: "899461180848"
-        };
-        firebase.initializeApp(config);
-        var database = firebase.database();
 
-        database.ref("/Person").on("value", function (snapshot) { //initializing firebase
-            if (snapshot.val() === null) {
-                var roles = ["Manager", "QA", "BA", "Dev"];
-                var count = 0;
-                for (var i = 0; i < 4; i++) {
-                    $.ajax({
-                        url: 'https://randomuser.me/api/',
-                        dataType: 'json',
-                        method: "GET"
-                    }).done(function (data) {
-                        console.log(data);
-                        var teamMember = { data: data, role: roles[count] };
-                        console.log(teamMember);
-                        database.ref("/Person").push(teamMember);
-                        count++;
-                    });
-                }
-            }
-        }, function (errorObject) { //error handler function
-            console.log("The read failed: " + errorObject.code);
-        });
 
-        database.ref("/task").on("value", function (snapshot) {
-            if (snapshot.val() !== null) {
-                task = snapshot.val();
-                console.log(snapshot.val().timesPassed);
-                count = snapshot.val().timesPassed;
-                $("#task-display").html(snapshot.val().taskText);
-                if (snapshot.val().assignedTo === "Manager") {
-                    $("#member1Img").attr("src", manager.data.results[0].picture.large);
-                }
-                if (snapshot.val().assignedTo === "QA") {
-                    $("#member1Img").attr("src", qa.data.results[0].picture.large);
-                }
-                if (snapshot.val().assignedTo === "BA") {
-                    $("#member1Img").attr("src", ba.data.results[0].picture.large);
-                }
-                if (snapshot.val().assignedTo === "Dev") {
-                    $("#member1Img").attr("src", dev.data.results[0].picture.large);
-                }
-                if(snapshot.val().timesPassed>3){
-                    $("#potatoImg").attr("src","https://slack-imgs.com/?c=1&url=https%3A%2F%2Fmedia.giphy.com%2Fmedia%2F3oEduUNILoKY1sciqI%2Fgiphy.gif");
-                }
-            }
-            else{
-                $("#member1Img").attr("src", "assets/images/mng.png");
-                 $("#task-display").html("");
-            }
-            
-
-        }, function (errorObject) { //error handler function
-            console.log("The read failed: " + errorObject.code);
-        });
-
-        var i = 1;
-
-        database.ref("/Person").on("child_added", function (snapshot) { //initializing page
-            if (i == 1) {
-                manager = snapshot.val();
-            }
-            if (i == 2) {
-                qa = snapshot.val();
-            }
-            if (i == 3) {
-                ba = snapshot.val();
-            }
-            if (i == 4) {
-                dev = snapshot.val();
-            }
-            $("#role" + i).html(snapshot.val().role);
-            $("#name" + i).html(snapshot.val().data.results[0].name.first + " " + snapshot.val().data.results[0].name.last);
-            console.log(snapshot.val().data.results[0].name.first + " " + snapshot.val().data.results[0].name.last);
-            $("#pic" + i).attr("src", snapshot.val().data.results[0].picture.large);
-            i++;
-        });
-
-        $("#task-button").on("click", function () {
-            var taskText = $("#task-item").val().trim()
-            task = { taskText: taskText, assignedTo: "Manager", timesPassed: 0, property: "task" };
-            database.ref("/task").set(task);
-            $("#member1Img").attr("src", manager.data.results[0].picture.large);
-            $("#task-display").html(taskText);
-            count = 0;
-        });
-
-        $(".assign").on("click", function () {
-            assignTo = $(this).data("role");
-            console.log(assignTo);
-        })
-
-        $("#pass").on("click", function () {
-            if (assignTo !== "") {
-                console.log(task);
-                if (assignTo !== task.assignedTo) {
-                    task.assignedTo = assignTo;
-                    if (assignTo === "manager") {
-                        $("#member2Img").attr("src", manager.data.results[0].picture.large)
-                    }
-                    if (assignTo === "QA") {
-                        $("#member2Img").attr("src", qa.data.results[0].picture.large)
-                    }
-                    if (assignTo === "BA") {
-                        $("#member2Img").attr("src", ba.data.results[0].picture.large)
-                    }
-                    if (assignTo === "Dev") {
-                        $("#member2Img").attr("src", dev.data.results[0].picture.large)
-                    }
-                    count++;
-                    task.timesPassed = count;
-                    
-                    $("#potatoImg").addClass("spin");
-                    setTimeout(function () {
-                        $("#member1Img").attr("src", $("#member2Img").attr("src"));
-                        $("#member2Img").attr("src", "assets/images/end-user-icon.jpg");
-                        $("#potatoImg").removeClass("spin");
-                        database.ref("/task").set(task);
-                    }, 3000);
-                    
-                }
-                else {
-                    console.log("You already have this assignment");
-                }
-            }
-            else {
-                console.log("You need to pick someone to reassign this to.");
-            }
-        });
-
-        $("#completed").on("click", function(){
-            database.ref("/task").set(null);
-        });
-
-    </script>
-
-    
 </body>
 
 </body>
